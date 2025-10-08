@@ -69,7 +69,7 @@ public class ReactNativeUnity {
                         unityPlayer.requestFocusPlayer();
                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {}
 
-                    unityPlayer.resume();
+                    resume();
 
                     if (!fullScreen) {
                         activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -145,7 +145,7 @@ public class ReactNativeUnity {
         group.addView(unityPlayer.requestFrame(), 0, layoutParams);
         unityPlayer.windowFocusChanged(true);
         unityPlayer.requestFocusPlayer();
-        unityPlayer.resume();
+        resume();
     }
 
     public interface UnityPlayerCallback {

@@ -41,9 +41,9 @@ public class ReactNativeUnityView extends FrameLayout {
     // pause Unity on blur, resume on focus
     if (hasWindowFocus && _isUnityPaused) {
       // view.requestFocus();
-      view.resume();
+      resume();
     } else if (!hasWindowFocus && !_isUnityPaused) {
-      view.pause();
+      pause();
     }
   }
 

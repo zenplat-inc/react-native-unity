@@ -177,7 +177,7 @@ public class ReactNativeUnityViewManager extends ReactNativeUnityViewManagerSpec
   public void onHostResume() {
     if (isUnityReady()) {
       assert getPlayer() != null;
-      getPlayer().resume();
+      resume();
       restoreUnityUserState();
     }
   }
@@ -186,7 +186,7 @@ public class ReactNativeUnityViewManager extends ReactNativeUnityViewManagerSpec
   public void onHostPause() {
     if (isUnityReady()) {
       assert getPlayer() != null;
-      getPlayer().pause();
+      pause();
     }
   }
 
@@ -206,7 +206,7 @@ public class ReactNativeUnityViewManager extends ReactNativeUnityViewManagerSpec
         @Override
         public void run() {
           if (getPlayer() != null) {
-            getPlayer().pause();
+            pause();
           }
         }
       }, 300);
