@@ -100,11 +100,9 @@ public class UPlayer {
             // If it is old UnityPlayer, use isInstance() and cast() to bypass incompatible type checks when compiling using newer versions of UnityPlayer
             if (FrameLayout.class.isInstance(unityPlayer)) {
                 return FrameLayout.class.cast(unityPlayer);
+            } else {
+                return null;
             }
-
-            FrameLayout layout = new FrameLayout(unityPlayer.getContext());
-            layout.addView(unityPlayer.getView());
-            return layout;
         }
     }
 
