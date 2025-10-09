@@ -1,7 +1,7 @@
 {
-  "name": "@artmajeur/react-native-unity",
-  "version": "0.0.6",
-  "description": "React Native Unity",
+  "name": "@zenplat-inc/react-native-unity",
+  "version": "0.0.1",
+  "description": "React Native bridge for embedding Unity, patched to keep UnityView rendering across navigation, screenshots, and background transitions.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/index.d.ts",
@@ -44,14 +44,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YourArtOfficial/react-native-unity.git"
+    "url": "git+https://github.com/zenplat-inc/react-native-unity.git"
   },
-  "author": "Alexey Zolotaryov <azesm@me.com> (https://github.com/azesmway), ArtMajeur Tech <dev@artmajeur.com> (https://github.com/YourArtOfficial)",
+  "author": "Zenplat Inc. (https://github.com/zenplat-inc)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/YourArtOfficial/react-native-unity/issues"
+    "url": "https://github.com/zenplat-inc/react-native-unity/issues"
   },
-  "homepage": "https://github.com/YourArtOfficial/react-native-unity#readme",
+  "homepage": "https://github.com/zenplat-inc/react-native-unity#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
