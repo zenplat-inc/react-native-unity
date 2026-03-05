@@ -56,7 +56,7 @@ Pod::Spec.new do |s|
     fi
   CMD
 
-  if File.exist?(File.join(__dir__, "../../../unity/builds/ios/UnityFramework.xcframework"))
+  if File.exist?(File.join(__dir__, "ios/UnityFramework.xcframework"))
     s.vendored_frameworks = ["ios/UnityFramework.xcframework"]
   else
     s.vendored_frameworks = ["ios/UnityFramework.framework"]
