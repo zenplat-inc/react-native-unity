@@ -14,39 +14,59 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "12.4" }
   s.source       = { :git => "https://github.com/azesmway/react-native-unity.git", :tag => "#{s.version}" }
 
-  s.source_files = "ios/**/*.{h,m,mm}"
+  # 非再帰パターンで ios/ 直下のファイルのみを収集する
+  # ios/**/*.{h,m,mm} だと xcframework の両スライスのヘッダーを拾い
+  # "Multiple commands produce" エラーが発生するため
+  s.source_files = "ios/*.{h,m,mm}"
+
+  # CocoaPods は vendored_frameworks を宣言したポッド自身の xcconfig に
+  # ${PODS_XCFRAMEWORKS_BUILD_DIR}/react-native-unity を自動追加しないため明示指定
+  s.pod_target_xcconfig = {
+    "FRAMEWORK_SEARCH_PATHS" => "\"$(PODS_XCFRAMEWORKS_BUILD_DIR)/react-native-unity\""
+  }
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.
   # See https://github.com/facebook/react-native/blob/febf6b7f33fdb4904669f99d795eba4c0f95d7bf/scripts/cocoapods/new_architecture.rb#L79.
   if respond_to?(:install_modules_dependencies, true)
     install_modules_dependencies(s)
   else
-  s.dependency "React-Core"
+    s.dependency "React-Core"
 
-  # Don't install the dependencies when we run `pod install` in the old architecture.
-  if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
-    s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
-    s.pod_target_xcconfig    = {
-        "DEFINES_MODULE" => "YES",
-        "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
-        "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
-        "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
-    }
-    s.dependency "React-RCTFabric"
-    s.dependency "React-Codegen"
-    s.dependency "RCT-Folly"
-    s.dependency "RCTRequired"
-    s.dependency "RCTTypeSafety"
-    s.dependency "ReactCommon/turbomodule/core"
-   end
+    # Don't install the dependencies when we run `pod install` in the old architecture.
+    if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
+      s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
+      s.pod_target_xcconfig = {
+          "DEFINES_MODULE" => "YES",
+          "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
+          "FRAMEWORK_SEARCH_PATHS" => "\"$(PODS_XCFRAMEWORKS_BUILD_DIR)/react-native-unity\"",
+          "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
+          "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
+      }
+      s.dependency "React-RCTFabric"
+      s.dependency "React-Codegen"
+      s.dependency "RCT-Folly"
+      s.dependency "RCTRequired"
+      s.dependency "RCTTypeSafety"
+      s.dependency "ReactCommon/turbomodule/core"
+    end
   end
 
-  # Copy the framework to the plugin folder so that xcode can install it
-  # The framework should be placed in the <YOUR_PROJECT>/unity/builds/ios folder.
+  # xcframework が存在する場合はそちらを優先する（シミュレーター対応）
+  # rm -rf で既存ファイルを先に削除し、cp -R のネストを防ぐ
   s.prepare_command =
   <<-CMD
-    cp -R ../../../unity/builds/ios/ ios/
+    rm -rf ios/UnityFramework.framework ios/UnityFramework.xcframework
+    if [ -d ../../../unity/builds/ios/UnityFramework.xcframework ]; then
+      cp -R ../../../unity/builds/ios/UnityFramework.xcframework ios/
+    elif [ -d ../../../unity/builds/ios/UnityFramework.framework ]; then
+      cp -R ../../../unity/builds/ios/UnityFramework.framework ios/
+    fi
   CMD
 
-  s.vendored_frameworks = ["ios/UnityFramework.framework"]
+  xcframework_path = File.join(__dir__, "ios/UnityFramework.xcframework")
+  if File.exist?(xcframework_path)
+    s.vendored_frameworks = ["ios/UnityFramework.xcframework"]
+  else
+    s.vendored_frameworks = ["ios/UnityFramework.framework"]
+  end
 end
