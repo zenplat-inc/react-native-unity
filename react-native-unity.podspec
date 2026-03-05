@@ -14,7 +14,10 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "12.4" }
   s.source       = { :git => "https://github.com/azesmway/react-native-unity.git", :tag => "#{s.version}" }
 
-  s.source_files = "ios/**/*.{h,m,mm}"
+  # 非再帰パターンで ios/ 直下のファイルのみを収集する
+  # ios/**/*.{h,m,mm} だと xcframework の両スライスのヘッダーを拾い
+  # "Multiple commands produce" エラーが発生するため
+  s.source_files = "ios/*.{h,m,mm}"
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.
   # See https://github.com/facebook/react-native/blob/febf6b7f33fdb4904669f99d795eba4c0f95d7bf/scripts/cocoapods/new_architecture.rb#L79.
@@ -41,12 +44,21 @@ Pod::Spec.new do |s|
    end
   end
 
-  # Copy the framework to the plugin folder so that xcode can install it
-  # The framework should be placed in the <YOUR_PROJECT>/unity/builds/ios folder.
+  # xcframework が存在する場合はそちらを優先する（シミュレーター対応）
+  # rm -rf で既存ファイルを先に削除し、cp -R のネストを防ぐ
   s.prepare_command =
   <<-CMD
-    cp -R ../../../unity/builds/ios/ ios/
+    rm -rf ios/UnityFramework.framework ios/UnityFramework.xcframework
+    if [ -d ../../../unity/builds/ios/UnityFramework.xcframework ]; then
+      cp -R ../../../unity/builds/ios/UnityFramework.xcframework ios/
+    elif [ -d ../../../unity/builds/ios/UnityFramework.framework ]; then
+      cp -R ../../../unity/builds/ios/UnityFramework.framework ios/
+    fi
   CMD
 
-  s.vendored_frameworks = ["ios/UnityFramework.framework"]
+  if File.exist?(File.join(__dir__, "../../../unity/builds/ios/UnityFramework.xcframework"))
+    s.vendored_frameworks = ["ios/UnityFramework.xcframework"]
+  else
+    s.vendored_frameworks = ["ios/UnityFramework.framework"]
+  end
 end
