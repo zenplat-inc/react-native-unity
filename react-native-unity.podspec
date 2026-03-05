@@ -19,29 +19,36 @@ Pod::Spec.new do |s|
   # "Multiple commands produce" エラーが発生するため
   s.source_files = "ios/*.{h,m,mm}"
 
+  # CocoaPods は vendored_frameworks を宣言したポッド自身の xcconfig に
+  # ${PODS_XCFRAMEWORKS_BUILD_DIR}/react-native-unity を自動追加しないため明示指定
+  s.pod_target_xcconfig = {
+    "FRAMEWORK_SEARCH_PATHS" => "\"$(PODS_XCFRAMEWORKS_BUILD_DIR)/react-native-unity\""
+  }
+
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.
   # See https://github.com/facebook/react-native/blob/febf6b7f33fdb4904669f99d795eba4c0f95d7bf/scripts/cocoapods/new_architecture.rb#L79.
   if respond_to?(:install_modules_dependencies, true)
     install_modules_dependencies(s)
   else
-  s.dependency "React-Core"
+    s.dependency "React-Core"
 
-  # Don't install the dependencies when we run `pod install` in the old architecture.
-  if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
-    s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
-    s.pod_target_xcconfig    = {
-        "DEFINES_MODULE" => "YES",
-        "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
-        "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
-        "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
-    }
-    s.dependency "React-RCTFabric"
-    s.dependency "React-Codegen"
-    s.dependency "RCT-Folly"
-    s.dependency "RCTRequired"
-    s.dependency "RCTTypeSafety"
-    s.dependency "ReactCommon/turbomodule/core"
-   end
+    # Don't install the dependencies when we run `pod install` in the old architecture.
+    if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
+      s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
+      s.pod_target_xcconfig = {
+          "DEFINES_MODULE" => "YES",
+          "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
+          "FRAMEWORK_SEARCH_PATHS" => "\"$(PODS_XCFRAMEWORKS_BUILD_DIR)/react-native-unity\"",
+          "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
+          "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
+      }
+      s.dependency "React-RCTFabric"
+      s.dependency "React-Codegen"
+      s.dependency "RCT-Folly"
+      s.dependency "RCTRequired"
+      s.dependency "RCTTypeSafety"
+      s.dependency "ReactCommon/turbomodule/core"
+    end
   end
 
   # xcframework が存在する場合はそちらを優先する（シミュレーター対応）
@@ -56,7 +63,8 @@ Pod::Spec.new do |s|
     fi
   CMD
 
-  if File.exist?(File.join(__dir__, "ios/UnityFramework.xcframework"))
+  xcframework_path = File.join(__dir__, "ios/UnityFramework.xcframework")
+  if File.exist?(xcframework_path)
     s.vendored_frameworks = ["ios/UnityFramework.xcframework"]
   else
     s.vendored_frameworks = ["ios/UnityFramework.framework"]
