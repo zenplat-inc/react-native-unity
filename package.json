@@ -1,6 +1,6 @@
 {
   "name": "@zenplat-inc/react-native-unity",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "React Native bridge for embedding Unity, patched to keep UnityView rendering across navigation, screenshots, and background transitions.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

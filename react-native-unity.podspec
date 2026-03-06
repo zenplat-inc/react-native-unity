@@ -51,22 +51,23 @@ Pod::Spec.new do |s|
     end
   end
 
-  # xcframework が存在する場合はそちらを優先する（シミュレーター対応）
-  # rm -rf で既存ファイルを先に削除し、cp -R のネストを防ぐ
+  # prepare_command は pod install 時に一度だけ実行される
+  # - rm -rf で既存ファイルを先に削除し cp -R のネストを防ぐ
+  # - xcframework が存在する場合はそのままコピー
+  # - framework のみの場合は xcodebuild で xcframework に変換（シミュレーター対応）
   s.prepare_command =
   <<-CMD
     rm -rf ios/UnityFramework.framework ios/UnityFramework.xcframework
     if [ -d ../../../unity/builds/ios/UnityFramework.xcframework ]; then
       cp -R ../../../unity/builds/ios/UnityFramework.xcframework ios/
     elif [ -d ../../../unity/builds/ios/UnityFramework.framework ]; then
-      cp -R ../../../unity/builds/ios/UnityFramework.framework ios/
+      xcodebuild -create-xcframework \
+        -framework ../../../unity/builds/ios/UnityFramework.framework \
+        -output ios/UnityFramework.xcframework
     fi
   CMD
 
-  xcframework_path = File.join(__dir__, "ios/UnityFramework.xcframework")
-  if File.exist?(xcframework_path)
-    s.vendored_frameworks = ["ios/UnityFramework.xcframework"]
-  else
-    s.vendored_frameworks = ["ios/UnityFramework.framework"]
-  end
+  # File.exist? は prepare_command 実行前に評価されるため条件分岐できない。
+  # prepare_command が必ず xcframework を生成するため、常に xcframework を指定する。
+  s.vendored_frameworks = ["ios/UnityFramework.xcframework"]
 end
